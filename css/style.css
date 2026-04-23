@@ -1,147 +1,128 @@
-/* --- Root Variables & Theme Management --- */
 :root {
-    --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --card-bg: rgba(255, 255, 255, 0.9);
-    --text-main: #2d3748;
-    --text-muted: #718096;
-    --accent: #667eea;
-    --border-color: rgba(0, 0, 0, 0.1);
-    --input-bg: rgba(255, 255, 255, 0.5);
+    --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
 }
 
 body.dark-mode {
-    --bg-gradient: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-    --card-bg: rgba(31, 41, 55, 0.95);
-    --text-main: #f7fafc;
-    --text-muted: #a0aec0;
-    --accent: #a3b1ff;
-    --border-color: rgba(255, 255, 255, 0.1);
-    --input-bg: rgba(255, 255, 255, 0.05);
+    --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
 }
 
-/* --- Base Styles --- */
 body {
     font-family: 'Inter', sans-serif;
     background: var(--bg-gradient);
-    background-attachment: fixed;
+    color: var(--text-primary);
     min-height: 100vh;
-    padding: 2rem 1rem;
-    color: var(--text-main);
-    transition: all 0.4s ease;
+    transition: all 0.3s ease;
 }
 
-/* --- Glassmorphism Card --- */
 .glass-card {
     background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--border-color);
-    border-radius: 1.25rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
     padding: 1.5rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.glass-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-}
-
-/* --- Typography Updates --- */
-#digital-clock {
-    color: var(--accent);
-    text-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
-}
-
-#current-date {
-    color: var(--text-muted);
-}
-
-/* --- Form Inputs --- */
-input {
-    background: var(--input-bg) !important;
-    border: 1px solid var(--border-color) !important;
-    color: var(--text-main) !important;
-}
-
-input::placeholder {
-    color: var(--text-muted);
-    opacity: 0.7;
-}
-
-/* --- Custom Buttons --- */
 .btn-primary {
-    background-color: #667eea;
+    background: #4f46e5;
     color: white;
-    padding: 0.5rem 1.25rem;
+    padding: 0.5rem 1.5rem;
     border-radius: 0.75rem;
     font-weight: 600;
-    transition: all 0.2s ease;
-    border: none;
+    transition: all 0.2s;
 }
 
 .btn-primary:hover {
-    background-color: #5a67d8;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    background: #4338ca;
+    transform: translateY(-1px);
+}
+
+/* Styling tombol durasi (25m, 45m, 60m) */
+.glass-card button[onclick^="setTimerDuration"] {
+    background: #e5e7eb;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+body.dark-mode .glass-card button[onclick^="setTimerDuration"] {
+    background: #334155;
+    color: #f1f5f9;
+}
+
+.glass-card button[onclick^="setTimerDuration"]:hover {
+    background: #4f46e5 !important;
+    color: white !important;
 }
 
 .btn-timer {
-    background-color: var(--input-bg);
-    color: var(--text-main);
-    padding: 0.6rem 1.2rem;
+    background: #f3f4f6;
+    color: #4b5563;
+    padding: 0.5rem 1rem;
     border-radius: 0.75rem;
-    font-weight: 500;
-    border: 1px solid var(--border-color);
-    transition: all 0.2s ease;
+    font-weight: 600;
+    transition: all 0.2s;
 }
 
-.btn-timer.active {
-    background-color: #667eea !important;
-    color: white !important;
-    border-color: #667eea;
+body.dark-mode .btn-timer {
+    background: #334155;
+    color: #e2e8f0;
 }
 
-/* --- Task List Styling --- */
-#task-list li {
-    border-bottom: 1px solid var(--border-color);
-    transition: background 0.2s ease;
+.btn-timer:hover {
+    background: #4f46e5;
+    color: white;
 }
 
-#task-list li:hover {
-    background: rgba(102, 126, 234, 0.05);
+.task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.task-done {
+body.dark-mode .task-item {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.line-through {
     text-decoration: line-through;
-    color: var(--text-muted);
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
-/* --- Scrollbar Customization --- */
+.link-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #4f46e5;
+    color: white;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.link-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
 }
-
 ::-webkit-scrollbar-track {
     background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.1);
+    background: #cbd5e1;
     border-radius: 10px;
-}
-
-body.dark-mode ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/* --- Mobile Responsive Fix --- */
-@media (max-width: 768px) {
-    body {
-        padding: 1rem;
-    }
-    
-    .text-6xl {
-        font-size: 3.5rem;
-    }
 }

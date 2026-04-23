@@ -1,186 +1,247 @@
-// --- State Management ---
-let tasks = JSON.parse(localStorage.getItem('dashboard_tasks')) || [];
-let quickLinks = JSON.parse(localStorage.getItem('dashboard_links')) || [
-    { name: "Google", url: "https://google.com" },
-    { name: "GitHub", url: "https://github.com" }
-];
-let userName = localStorage.getItem('dashboard_user_name') || "User";
-let isDark = localStorage.getItem('dashboard_theme') === 'dark';
+/* ================================================
+   STATE & INITIALIZATION
+   ================================================ */
+let tasks = JSON.parse(localStorage.getItem("pp_tasks")) || [];
+let links = JSON.parse(localStorage.getItem("pp_links")) || [];
+let userName = localStorage.getItem("pp_name") || "User";
+let isDark = localStorage.getItem("pp_theme") === "dark";
 
-// --- FITUR: Dark Mode ---
-function applyTheme() {
-    document.body.classList.toggle('dark-mode', isDark);
-    document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
-    localStorage.setItem('dashboard_theme', isDark ? 'dark' : 'light');
-}
+let timerInterval = null;
+let timeLeft = 25 * 60;
+let defaultMins = 25;
+let editingIdx = null;
 
+/* ================================================
+   THEME MANAGEMENT
+   ================================================ */
 function toggleDarkMode() {
     isDark = !isDark;
     applyTheme();
+    // Update greeting color immediately after theme toggle
+    updateClock();
 }
 
-// --- FITUR: Nama & Greeting ---
-function updateGreeting() {
-    const now = new Date();
-    const hr = now.getHours();
-    let greetingText = "Selamat Malam";
-    
-    if (hr < 12) greetingText = "Selamat Pagi";
-    else if (hr < 15) greetingText = "Selamat Siang";
-    else if (hr < 18) greetingText = "Selamat Sore";
-    
-    // Perbaikan: ID di HTML adalah 'greeting', di dalamnya ada 'user-name'
-    const greetingContainer = document.getElementById('greeting');
-    greetingContainer.innerHTML = `${greetingText}, <span id="user-name" onclick="changeName()" class="cursor-pointer border-b-2 border-indigo-400">${userName}</span>`;
-}
-
-function changeName() {
-    const newName = prompt("Siapa nama Anda?", userName);
-    if (newName !== null && newName.trim() !== "") {
-        userName = newName.trim();
-        localStorage.setItem('dashboard_user_name', userName);
-        updateGreeting();
+function applyTheme() {
+    const greetingEl = document.getElementById("greeting");
+    if (isDark) {
+        document.body.classList.add("dark-mode");
+        document.body.classList.remove("light-mode");
+        document.getElementById("theme-icon").textContent = "☀️";
+        if (greetingEl) {
+            greetingEl.classList.replace("text-gray-800", "text-white");
+        }
+        localStorage.setItem("pp_theme", "dark");
+    } else {
+        document.body.classList.add("light-mode");
+        document.body.classList.remove("dark-mode");
+        document.getElementById("theme-icon").textContent = "🌙";
+        if (greetingEl) {
+            greetingEl.classList.replace("text-white", "text-gray-800");
+        }
+        localStorage.setItem("pp_theme", "light");
     }
 }
 
-// --- FITUR: Focus Timer (Pomodoro) ---
-let timerInterval;
-let defaultDuration = 25 * 60;
-let timeLeft = defaultDuration;
+/* ================================================
+   CLOCK & DATE
+   ================================================ */
+function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateStr = now.toLocaleDateString('id-ID', options);
 
+    document.getElementById("digital-clock").textContent = `${h}:${m}:${s}`;
+    document.getElementById("current-date").textContent = dateStr;
+
+    // Greeting logic
+    let greetingText = "Selamat Malam";
+    if (now.getHours() < 12) greetingText = "Selamat Pagi";
+    else if (now.getHours() < 15) greetingText = "Selamat Siang";
+    else if (now.getHours() < 18) greetingText = "Selamat Sore";
+
+    // Dynamic text color for greeting based on theme
+    const textColorClass = isDark ? "text-white" : "text-gray-800";
+    const greetingEl = document.getElementById("greeting");
+    
+    if (greetingEl) {
+        greetingEl.className = `text-3xl font-semibold ${textColorClass}`;
+        greetingEl.innerHTML = 
+            `${greetingText}, <span id="user-name" onclick="changeName()" class="cursor-pointer border-b-2 border-indigo-400">${userName}</span>`;
+    }
+}
+
+function changeName() {
+    const newName = prompt("Masukkan nama Anda:", userName);
+    if (newName) {
+        userName = newName.trim();
+        localStorage.setItem("pp_name", userName);
+        updateClock();
+    }
+}
+
+/* ================================================
+   FOCUS TIMER
+   ================================================ */
 function setTimerDuration(mins) {
     stopTimer();
-    defaultDuration = mins * 60;
-    timeLeft = defaultDuration;
+    defaultMins = mins;
+    timeLeft = mins * 60;
     updateTimerDisplay();
 }
 
 function updateTimerDisplay() {
     const m = Math.floor(timeLeft / 60);
     const s = timeLeft % 60;
-    document.getElementById('timer-display').textContent = 
-        `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    document.getElementById("timer-display").textContent = 
+        `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
 function startTimer() {
     if (timerInterval) return;
-    document.getElementById('btn-start').classList.add('active');
     timerInterval = setInterval(() => {
-        if (timeLeft > 0) { 
-            timeLeft--; 
-            updateTimerDisplay(); 
-        } else { 
-            stopTimer(); 
-            alert("Waktu fokus selesai! Istirahat sejenak."); 
+        if (timeLeft > 0) {
+            timeLeft--;
+            updateTimerDisplay();
+        } else {
+            stopTimer();
+            alert("Waktu fokus selesai!");
         }
     }, 1000);
+    document.getElementById("btn-start").classList.add("bg-indigo-600", "text-white");
 }
 
 function stopTimer() {
     clearInterval(timerInterval);
     timerInterval = null;
-    document.getElementById('btn-start').classList.remove('active');
+    document.getElementById("btn-start").classList.remove("bg-indigo-600", "text-white");
 }
 
 function resetTimer() {
     stopTimer();
-    timeLeft = defaultDuration;
+    timeLeft = defaultMins * 60;
     updateTimerDisplay();
 }
 
-// --- FITUR: Task List ---
+/* ================================================
+   TASK MANAGEMENT
+   ================================================ */
 function addTask() {
-    const input = document.getElementById('task-input');
-    const errorMsg = document.getElementById('task-error');
+    const input = document.getElementById("task-input");
     const text = input.value.trim();
-
     if (!text) return;
+
     if (tasks.some(t => t.text.toLowerCase() === text.toLowerCase())) {
-        errorMsg.classList.remove('hidden');
+        const err = document.getElementById("task-error");
+        err.classList.remove("hidden");
+        setTimeout(() => err.classList.add("hidden"), 2000);
         return;
     }
 
-    errorMsg.classList.add('hidden');
-    tasks.push({ text: text, completed: false });
-    input.value = '';
-    renderTasks();
+    tasks.push({ text, completed: false });
+    input.value = "";
+    saveAndRenderTasks();
 }
 
-function renderTasks() {
-    const list = document.getElementById('task-list');
-    list.innerHTML = '';
+function toggleTask(idx) {
+    tasks[idx].completed = !tasks[idx].completed;
+    saveAndRenderTasks();
+}
+
+function deleteTask(idx) {
+    tasks.splice(idx, 1);
+    saveAndRenderTasks();
+}
+
+function openEdit(idx) {
+    editingIdx = idx;
+    document.getElementById("edit-input").value = tasks[idx].text;
+    document.getElementById("edit-overlay").classList.replace("hidden", "flex");
+}
+
+function closeEdit() {
+    document.getElementById("edit-overlay").classList.replace("flex", "hidden");
+    editingIdx = null;
+}
+
+function saveEdit() {
+    const newVal = document.getElementById("edit-input").value.trim();
+    if (newVal && editingIdx !== null) {
+        tasks[editingIdx].text = newVal;
+        closeEdit();
+        saveAndRenderTasks();
+    }
+}
+
+function saveAndRenderTasks() {
+    localStorage.setItem("pp_tasks", JSON.stringify(tasks));
+    const list = document.getElementById("task-list");
+    list.innerHTML = tasks.length ? "" : '<li class="text-gray-400 text-center py-4">Belum ada tugas.</li>';
+    
     tasks.forEach((t, i) => {
-        const li = document.createElement('li');
-        li.className = "flex items-center justify-between p-2 border-b border-gray-100 dark:border-gray-700";
+        const li = document.createElement("li");
+        li.className = "task-item";
         li.innerHTML = `
-            <div class="flex items-center space-x-3">
-                <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${i})" class="w-4 h-4 text-indigo-600">
-                <span class="${t.completed ? 'task-done' : ''}">${t.text}</span>
+            <div class="flex items-center gap-3">
+                <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${i})" class="w-5 h-5 rounded border-gray-300">
+                <span class="${t.completed ? 'line-through' : ''} ${isDark ? 'text-white' : 'text-gray-800'}">${t.text}</span>
             </div>
-            <button onclick="deleteTask(${i})" class="text-red-400 hover:text-red-600 text-sm">Hapus</button>
+            <div class="flex gap-2">
+                <button onclick="openEdit(${i})" class="text-xs text-blue-500">Edit</button>
+                <button onclick="deleteTask(${i})" class="text-xs text-red-500">Hapus</button>
+            </div>
         `;
         list.appendChild(li);
     });
-    localStorage.setItem('dashboard_tasks', JSON.stringify(tasks));
 }
 
-function toggleTask(i) { tasks[i].completed = !tasks[i].completed; renderTasks(); }
-function deleteTask(i) { tasks.splice(i, 1); renderTasks(); }
-
-// --- FITUR: Quick Links ---
+/* ================================================
+   QUICK LINKS
+   ================================================ */
 function addLink() {
-    const nameInput = document.getElementById('link-name');
-    const urlInput = document.getElementById('link-url');
-    let url = urlInput.value.trim();
+    const nameInp = document.getElementById("link-name");
+    const urlInp = document.getElementById("link-url");
+    let name = nameInp.value.trim();
+    let url = urlInp.value.trim();
 
-    if (!nameInput.value || !url) return;
-    
-    // Auto-fix URL jika tidak ada http
-    if (!url.startsWith('http')) url = 'https://' + url;
+    if (!name || !url) return;
+    if (!url.startsWith("http")) url = "https://" + url;
 
-    quickLinks.push({ name: nameInput.value, url: url });
-    nameInput.value = '';
-    urlInput.value = '';
-    renderLinks();
+    links.push({ name, url });
+    nameInp.value = "";
+    urlInp.value = "";
+    saveAndRenderLinks();
 }
 
-function renderLinks() {
-    const container = document.getElementById('links-container');
-    container.innerHTML = '';
-    quickLinks.forEach((link, i) => {
-        const a = document.createElement('div');
-        a.className = "group relative flex items-center";
-        a.innerHTML = `
-            <a href="${link.url}" target="_blank" class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-200 transition">
-                ${link.name}
-            </a>
-            <button onclick="deleteLink(${i})" class="ml-1 text-xs text-gray-400 hover:text-red-500">×</button>
+function removeLink(idx) {
+    links.splice(idx, 1);
+    saveAndRenderLinks();
+}
+
+function saveAndRenderLinks() {
+    localStorage.setItem("pp_links", JSON.stringify(links));
+    const container = document.getElementById("links-container");
+    container.innerHTML = links.length ? "" : '<span class="text-gray-400 text-sm">Belum ada link.</span>';
+
+    links.forEach((l, i) => {
+        const chip = document.createElement("div");
+        chip.className = "link-chip";
+        chip.innerHTML = `
+            <a href="${l.url}" target="_blank">${l.name}</a>
+            <button onclick="removeLink(${i})" class="ml-1 hover:text-red-200">×</button>
         `;
-        container.appendChild(a);
+        container.appendChild(chip);
     });
-    localStorage.setItem('dashboard_links', JSON.stringify(quickLinks));
 }
 
-function deleteLink(i) {
-    quickLinks.splice(i, 1);
-    renderLinks();
-}
-
-// --- Digital Clock & Initialization ---
-function updateClock() {
-    const now = new Date();
-    document.getElementById('digital-clock').textContent = now.toLocaleTimeString('id-ID', {
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
-    document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-    });
-    updateGreeting();
-}
-
-// Jalankan saat pertama kali load
+/* ================================================
+   INIT
+   ================================================ */
 setInterval(updateClock, 1000);
 updateClock();
 applyTheme();
-renderTasks();
-renderLinks();
+saveAndRenderTasks();
+saveAndRenderLinks();
