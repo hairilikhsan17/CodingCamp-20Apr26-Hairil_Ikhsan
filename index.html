@@ -8,20 +8,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="light-mode">
+
+    <div class="fixed top-4 right-4">
+        <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-white/20 backdrop-blur-md border border-gray-300 shadow-md transition-all">
+            <span id="theme-icon">🌙</span>
+        </button>
+    </div>
 
     <div class="max-w-6xl mx-auto space-y-6">
         
         <div class="glass-card text-center py-10">
             <h1 id="digital-clock" class="text-6xl font-bold text-indigo-600 mb-2">00:00:00</h1>
             <p id="current-date" class="text-gray-500 text-lg mb-4">Loading date...</p>
-            <h2 id="greeting" class="text-3xl font-semibold text-gray-800">Selamat Pagi</h2>
+            <h2 id="greeting" class="text-3xl font-semibold text-gray-800">
+                Selamat Pagi, <span id="user-name" onclick="changeName()" class="cursor-pointer border-b-2 border-indigo-400">User</span>
+            </h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <div class="glass-card flex flex-col items-center justify-center">
-                <h3 class="text-xl font-bold mb-6">Focus Timer</h3>
+                <h3 class="text-xl font-bold mb-4">Focus Timer</h3>
+                <div class="flex space-x-2 mb-4">
+                    <button onclick="setTimerDuration(25)" class="text-xs bg-gray-200 px-3 py-1 rounded-full hover:bg-indigo-500 hover:text-white transition">25m</button>
+                    <button onclick="setTimerDuration(45)" class="text-xs bg-gray-200 px-3 py-1 rounded-full hover:bg-indigo-500 hover:text-white transition">45m</button>
+                    <button onclick="setTimerDuration(60)" class="text-xs bg-gray-200 px-3 py-1 rounded-full hover:bg-indigo-500 hover:text-white transition">60m</button>
+                </div>
                 <div id="timer-display" class="text-7xl font-bold text-indigo-500 mb-8">25:00</div>
                 <div class="flex space-x-4">
                     <button id="btn-start" onclick="startTimer()" class="btn-timer px-8">Start</button>
@@ -32,23 +45,22 @@
 
             <div class="glass-card flex flex-col">
                 <h3 class="text-xl font-bold mb-4">Tasks</h3>
-                <div class="flex space-x-2 mb-6">
-                    <input type="text" id="task-input" placeholder="Tambah tugas baru..." class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                <div class="flex space-x-2 mb-2">
+                    <input type="text" id="task-input" placeholder="Tambah tugas baru..." class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-transparent">
                     <button onclick="addTask()" class="btn-primary">Add</button>
                 </div>
-                <ul id="task-list" class="space-y-3 max-h-60 overflow-y-auto pr-2">
-                    </ul>
+                <p id="task-error" class="text-red-500 text-xs mb-2 hidden">Tugas sudah ada!</p>
+                <ul id="task-list" class="space-y-3 max-h-60 overflow-y-auto pr-2"></ul>
             </div>
 
             <div class="glass-card flex flex-col md:col-span-2 lg:col-span-1">
                 <h3 class="text-xl font-bold mb-4">Quick Links</h3>
                 <div class="flex flex-row space-x-2 mb-6">
-                    <input type="text" id="link-name" placeholder="Nama" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                    <input type="text" id="link-url" placeholder="URL" class="flex-[2] border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    <input type="text" id="link-name" placeholder="Nama" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-transparent">
+                    <input type="text" id="link-url" placeholder="URL" class="flex-[2] border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-transparent">
                     <button onclick="addLink()" class="btn-primary text-sm px-4">Add</button>
                 </div>
-                <div id="links-container" class="flex flex-wrap gap-3">
-                    </div>
+                <div id="links-container" class="flex flex-wrap gap-3"></div>
             </div>
 
         </div>

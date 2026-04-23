@@ -1,174 +1,128 @@
-// --- State Management (Local Storage) ---
+// --- State Management ---
 let tasks = JSON.parse(localStorage.getItem('dashboard_tasks')) || [];
-let quickLinks = JSON.parse(localStorage.getItem('dashboard_links')) || [];
+let userName = localStorage.getItem('dashboard_user_name') || "User";
+let isDark = localStorage.getItem('dashboard_theme') === 'dark';
 
-function saveToStorage() {
-    localStorage.setItem('dashboard_tasks', JSON.stringify(tasks));
-    localStorage.setItem('dashboard_links', JSON.stringify(quickLinks));
+// --- FITUR: Dark Mode ---
+function applyTheme() {
+    document.body.classList.toggle('dark-mode', isDark);
+    document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+    localStorage.setItem('dashboard_theme', isDark ? 'dark' : 'light');
 }
 
-// --- Jam Digital & Greeting ---
-function updateClock() {
+function toggleDarkMode() {
+    isDark = !isDark;
+    applyTheme();
+}
+
+// --- FITUR: Nama Khusus ---
+function updateGreeting() {
     const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    
-    document.getElementById('digital-clock').textContent = `${hours}:${minutes}:${seconds}`;
-    
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', options);
-
     let greeting = "Selamat Malam";
-    if (now.getHours() < 12) greeting = "Selamat Pagi";
-    else if (now.getHours() < 15) greeting = "Selamat Siang";
-    else if (now.getHours() < 18) greeting = "Selamat Sore";
-    document.getElementById('greeting').textContent = greeting;
+    const hr = now.getHours();
+    if (hr < 12) greeting = "Selamat Pagi";
+    else if (hr < 15) greeting = "Selamat Siang";
+    else if (hr < 18) greeting = "Selamat Sore";
+    
+    document.getElementById('greeting-text').textContent = greeting;
+    document.getElementById('user-name').textContent = userName;
 }
-setInterval(updateClock, 1000);
-updateClock();
 
-// --- Focus Timer ---
+function changeName() {
+    const newName = prompt("Siapa nama Anda?", userName);
+    if (newName) {
+        userName = newName.trim() || "User";
+        localStorage.setItem('dashboard_user_name', userName);
+        updateGreeting();
+    }
+}
+
+// --- FITUR: Pomodoro Variable ---
 let timerInterval;
-let timeLeft = 25 * 60;
+let defaultDuration = 25 * 60;
+let timeLeft = defaultDuration;
+
+function setTimerDuration(mins) {
+    stopTimer();
+    defaultDuration = mins * 60;
+    timeLeft = defaultDuration;
+    updateTimerDisplay();
+}
 
 function updateTimerDisplay() {
-    const mins = Math.floor(timeLeft / 60);
-    const secs = timeLeft % 60;
-    document.getElementById('timer-display').textContent = 
-        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-}
-
-function setActiveButton(activeId) {
-    const buttons = ['btn-start', 'btn-stop', 'btn-reset'];
-    buttons.forEach(id => {
-        const btn = document.getElementById(id);
-        if (id === activeId) btn.classList.add('active');
-        else btn.classList.remove('active');
-    });
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    document.getElementById('timer-display').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
 function startTimer() {
     if (timerInterval) return;
-    setActiveButton('btn-start');
+    document.getElementById('btn-start').classList.add('active');
     timerInterval = setInterval(() => {
-        if (timeLeft > 0) {
-            timeLeft--;
-            updateTimerDisplay();
-        } else {
-            stopTimer();
-            alert("Waktu fokus selesai!");
-        }
+        if (timeLeft > 0) { timeLeft--; updateTimerDisplay(); }
+        else { stopTimer(); alert("Waktu fokus selesai!"); }
     }, 1000);
 }
 
 function stopTimer() {
     clearInterval(timerInterval);
     timerInterval = null;
-    setActiveButton('btn-stop');
+    document.querySelectorAll('.btn-timer').forEach(b => b.classList.remove('active'));
 }
 
 function resetTimer() {
     stopTimer();
-    timeLeft = 25 * 60;
+    timeLeft = defaultDuration;
     updateTimerDisplay();
-    setActiveButton('btn-reset');
 }
 
-// --- Task List Logic ---
-function renderTasks() {
-    const list = document.getElementById('task-list');
-    list.innerHTML = '';
-    tasks.forEach((task, index) => {
-        const li = document.createElement('li');
-        li.className = "flex items-center justify-between p-2 border-b last:border-0";
-        li.innerHTML = `
-            <div class="flex items-center space-x-3 overflow-hidden">
-                <input type="checkbox" ${task.completed ? 'checked' : ''} 
-                    onchange="toggleTask(${index})" class="w-5 h-5 accent-indigo-500 flex-shrink-0">
-                <span class="text-gray-700 truncate ${task.completed ? 'task-done' : ''}">${task.text}</span>
-            </div>
-            <div class="flex items-center flex-shrink-0">
-                <button onclick="editTask(${index})" class="btn-edit">Edit</button>
-                <button onclick="deleteTask(${index})" class="btn-danger">Delete</button>
-            </div>
-        `;
-        list.appendChild(li);
-    });
-    saveToStorage();
-}
-
+// --- FITUR: Anti Duplikat ---
 function addTask() {
     const input = document.getElementById('task-input');
+    const errorMsg = document.getElementById('task-error');
     const text = input.value.trim();
+
     if (!text) return;
+    if (tasks.some(t => t.text.toLowerCase() === text.toLowerCase())) {
+        errorMsg.classList.remove('hidden');
+        return;
+    }
+
+    errorMsg.classList.add('hidden');
     tasks.push({ text: text, completed: false });
     input.value = '';
     renderTasks();
 }
 
-function toggleTask(index) {
-    tasks[index].completed = !tasks[index].completed;
-    renderTasks();
-}
-
-function deleteTask(index) {
-    tasks.splice(index, 1);
-    renderTasks();
-}
-
-function editTask(index) {
-    const newText = prompt("Edit tugas:", tasks[index].text);
-    if (newText !== null && newText.trim() !== "") {
-        tasks[index].text = newText.trim();
-        renderTasks();
-    }
-}
-
-// --- Quick Links Logic ---
-function renderLinks() {
-    const container = document.getElementById('links-container');
-    container.innerHTML = '';
-    quickLinks.forEach((link, index) => {
-        const div = document.createElement('div');
-        div.className = "flex items-center bg-indigo-500 text-white px-4 py-2 rounded-lg relative group transition-all hover:bg-indigo-600";
-        div.innerHTML = `
-            <a href="${link.url}" target="_blank" class="mr-2">${link.name}</a>
-            <button onclick="deleteLink(${index})" class="ml-2 text-xs bg-indigo-700 hover:bg-red-500 rounded-full w-4 h-4 flex items-center justify-center transition-colors">×</button>
+function renderTasks() {
+    const list = document.getElementById('task-list');
+    list.innerHTML = '';
+    tasks.forEach((t, i) => {
+        const li = document.createElement('li');
+        li.className = "flex items-center justify-between p-2 border-b border-gray-200";
+        li.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${i})">
+                <span class="${t.completed ? 'task-done' : ''}">${t.text}</span>
+            </div>
+            <button onclick="deleteTask(${i})" class="text-red-400 hover:text-red-600">Hapus</button>
         `;
-        container.appendChild(div);
+        list.appendChild(li);
     });
-    saveToStorage();
+    localStorage.setItem('dashboard_tasks', JSON.stringify(tasks));
 }
 
-function addLink() {
-    const nameInput = document.getElementById('link-name');
-    const urlInput = document.getElementById('link-url');
-    const name = nameInput.value.trim();
-    let url = urlInput.value.trim();
+function toggleTask(i) { tasks[i].completed = !tasks[i].completed; renderTasks(); }
+function deleteTask(i) { tasks.splice(i, 1); renderTasks(); }
 
-    if (!name || !url) return;
-    if (!url.startsWith('http')) url = 'https://' + url;
-
-    quickLinks.push({ name: name, url: url });
-    nameInput.value = '';
-    urlInput.value = '';
-    renderLinks();
+// Init
+function updateClock() {
+    const now = new Date();
+    document.getElementById('digital-clock').textContent = now.toLocaleTimeString('id-ID', {hour12:false});
+    document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    updateGreeting();
 }
 
-function deleteLink(index) {
-    quickLinks.splice(index, 1);
-    renderLinks();
-}
-
-// Init App
-document.getElementById('task-input').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addTask();
-});
-document.getElementById('link-url').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addLink();
-});
-
-// Load data on start
-renderTasks();
-renderLinks();
+setInterval(updateClock, 1000);
+applyTheme(); // Load tema
+renderTasks(); // Load tugas
