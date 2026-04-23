@@ -23,9 +23,7 @@ body {
     font-weight: 500;
 }
 
-.btn-primary:hover { 
-    background-color: #5a67d8; 
-}
+.btn-primary:hover { background-color: #5a67d8; }
 
 .btn-timer {
     color: #4a5568;
@@ -49,9 +47,7 @@ body {
     font-size: 0.875rem;
 }
 
-.btn-danger:hover { 
-    background-color: #fc8181; 
-}
+.btn-danger:hover { background-color: #fc8181; }
 
 .btn-edit {
     background-color: #e2e8f0;
