@@ -1,118 +1,147 @@
-body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    padding: 2rem;
-    color: #2d3748;
-}
-
-.glass-card {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 1rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    transition: transform 0.2s;
-    height: 100%;
-}
-
-.btn-primary {
-    background-color: #667eea;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-}
-
-.btn-primary:hover { background-color: #5a67d8; }
-
-.btn-timer {
-    color: #4a5568;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    background-color: #edf2f7;
-}
-
-.btn-timer.active {
-    background-color: #667eea;
-    color: white;
-}
-
-.btn-danger {
-    background-color: #feb2b2;
-    color: #c53030;
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.4rem;
-    font-size: 0.875rem;
-}
-
-.btn-danger:hover { background-color: #fc8181; }
-
-.btn-edit {
-    background-color: #e2e8f0;
-    color: #4a5568;
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.4rem;
-    font-size: 0.875rem;
-    margin-right: 0.5rem;
-}
-
-.task-done {
-    text-decoration: line-through;
-    color: #a0aec0;
-}
-
+/* --- Root Variables & Theme Management --- */
 :root {
     --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --card-bg: rgba(255, 255, 255, 0.95);
+    --card-bg: rgba(255, 255, 255, 0.9);
     --text-main: #2d3748;
+    --text-muted: #718096;
+    --accent: #667eea;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.5);
 }
 
 body.dark-mode {
     --bg-gradient: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-    --card-bg: rgba(45, 55, 72, 0.95);
+    --card-bg: rgba(31, 41, 55, 0.95);
     --text-main: #f7fafc;
+    --text-muted: #a0aec0;
+    --accent: #a3b1ff;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.05);
 }
 
+/* --- Base Styles --- */
 body {
     font-family: 'Inter', sans-serif;
     background: var(--bg-gradient);
+    background-attachment: fixed;
     min-height: 100vh;
-    padding: 2rem;
+    padding: 2rem 1rem;
     color: var(--text-main);
-    transition: background 0.5s ease, color 0.3s ease;
+    transition: all 0.4s ease;
 }
 
+/* --- Glassmorphism Card --- */
 .glass-card {
     background: var(--card-bg);
-    border-radius: 1rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     padding: 1.5rem;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-body.dark-mode h2, body.dark-mode h3, body.dark-mode #current-date {
-    color: #e2e8f0;
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 }
 
-.duration-btn {
-    font-size: 0.75rem;
-    background-color: rgba(0,0,0,0.05);
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    transition: all 0.2s;
-}
-body.dark-mode .duration-btn { background-color: rgba(255,255,255,0.1); }
-.duration-btn:hover { background-color: #667eea; color: white; }
-
-.input-field {
-    flex: 1; border: 1px solid #cbd5e0; border-radius: 0.5rem; 
-    padding: 0.5rem 1rem; background: transparent; color: inherit;
+/* --- Typography Updates --- */
+#digital-clock {
+    color: var(--accent);
+    text-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
 }
 
-/* Style sisanya (btn-primary, btn-timer, dll) tetap sama seperti sebelumnya */
-.btn-primary { background-color: #667eea; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; }
-.btn-timer { background-color: #edf2f7; color: #4a5568; padding: 0.5rem 1rem; border-radius: 0.5rem; }
-.btn-timer.active { background-color: #667eea; color: white; }
-.task-done { text-decoration: line-through; color: #a0aec0; }
+#current-date {
+    color: var(--text-muted);
+}
+
+/* --- Form Inputs --- */
+input {
+    background: var(--input-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
+input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+/* --- Custom Buttons --- */
+.btn-primary {
+    background-color: #667eea;
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #5a67d8;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-timer {
+    background-color: var(--input-bg);
+    color: var(--text-main);
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.btn-timer.active {
+    background-color: #667eea !important;
+    color: white !important;
+    border-color: #667eea;
+}
+
+/* --- Task List Styling --- */
+#task-list li {
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s ease;
+}
+
+#task-list li:hover {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.task-done {
+    text-decoration: line-through;
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+/* --- Scrollbar Customization --- */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Mobile Responsive Fix --- */
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+    
+    .text-6xl {
+        font-size: 3.5rem;
+    }
+}
